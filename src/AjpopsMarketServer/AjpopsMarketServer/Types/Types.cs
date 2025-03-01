@@ -1,25 +1,27 @@
-﻿namespace AjpopsMarketServer.Types;
+﻿using AjpopsMarketServer.Enums;
+
+namespace AjpopsMarketServer.Types;
 
 // User Types
-public record UserType(
+public record UserT(
     string Id,
     string Username,
     string Email,
-    UserTypeEnum Type,
+    UserType Type,
     DateTime CreatedAt,
     DateTime? LastLogin,
     bool IsActive
 );
 
-public record MemberType(
+public record MemberT(
     string Id,
     string Username,
     string Email,
-    UserTypeEnum Type,
+    UserType Type,
     DateTime CreatedAt,
     DateTime? LastLogin,
     bool IsActive,
-    MembershipLevelEnum Level,
+    MembershipLevel Level,
     DateTime MemberSince,
     DateTime MembershipExpiresAt,
     bool AutoRenew,
@@ -27,7 +29,7 @@ public record MemberType(
 );
 
 // Product Types
-public record ProductType(
+public record ProductT(
     string Id,
     string Name,
     string Description,
@@ -43,12 +45,12 @@ public record ProductType(
 );
 
 // Catalog Types
-public record CatalogType(
+public record CatalogT(
     string Id,
     string Name,
     string Description,
     bool RequiresMembership,
-    MembershipLevelEnum MinimumMembershipLevel,
+    MembershipLevel MinimumMembershipLevel,
     DateTime CreatedAt,
     DateTime UpdatedAt,
     string CreatedBy,
@@ -56,7 +58,7 @@ public record CatalogType(
 );
 
 // Category Types
-public record CategoryType(
+public record CategoryT(
     string Id,
     string Name,
     string Description,
@@ -67,11 +69,11 @@ public record CategoryType(
 );
 
 // Order Types
-public record OrderType(
+public record OrderT(
     string Id,
     string UserId,
-    OrderStatusEnum Status,
-    IReadOnlyList<OrderItemType> Items,
+    OrderStatus Status,
+    IReadOnlyList<OrderItemT> Items,
     decimal TotalAmount,
     DateTime CreatedAt,
     DateTime UpdatedAt,
@@ -79,7 +81,7 @@ public record OrderType(
     string? PaymentId
 );
 
-public record OrderItemType(
+public record OrderItemT(
     string ProductId,
     string ProductName,
     decimal UnitPrice,
