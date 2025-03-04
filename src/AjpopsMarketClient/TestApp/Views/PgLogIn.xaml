@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="TestApp.Views.PgLogIn"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:TestApp.ViewModels"
+    Title="LogIn"
+    x:DataType="vm:PgLogInViewModel"
+    Style="{StaticResource Cp}">
+
+    <Grid RowDefinitions="auto,*,auto" RowSpacing="16">
+        <Grid>
+            <VerticalStackLayout Spacing="8">
+                <Label
+                    FontSize="24"
+                    HorizontalTextAlignment="Center"
+                    Text="Ajpop's Market"
+                    TextColor="{StaticResource cl:Primary}" />
+                <Label
+                    FontSize="14"
+                    HorizontalTextAlignment="Center"
+                    Text="Sea bienvenid@ al rey de los mercados"
+                    TextColor="{StaticResource cl:Primary}" />
+            </VerticalStackLayout>
+        </Grid>
+        <Grid Grid.Row="1">
+            <VerticalStackLayout
+                MaximumWidthRequest="{OnIdiom Desktop='300'}"
+                Spacing="16"
+                VerticalOptions="Center">
+                <Label
+                    FontSize="18"
+                    HorizontalTextAlignment="Center"
+                    Text="Autenticación"
+                    TextColor="{StaticResource cl:Primary}" />
+                <Grid RowDefinitions="auto,auto" RowSpacing="8">
+                    <Label Text="Usuario:" />
+                    <Entry
+                        Grid.Row="1"
+                        Placeholder="Escriba aquí"
+                        Text="{Binding Email}" />
+                </Grid>
+                <Grid RowDefinitions="auto,auto" RowSpacing="8">
+                    <Label Text="Contraseña:" />
+                    <Entry
+                        Grid.Row="1"
+                        IsPassword="True"
+                        Placeholder="Escriba aquí"
+                        Text="{Binding Pwd}" />
+                </Grid>
+                <Button Text="Entrar" />
+                <Label
+                    HorizontalTextAlignment="Center"
+                    Style="{StaticResource LbLink}"
+                    Text="Regístrese aquí"
+                    TextColor="{StaticResource cl:Primary}"
+                    TextDecorations="None">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoToRegisterCommand}" />
+                    </Label.GestureRecognizers>
+
+                </Label>
+            </VerticalStackLayout>
+        </Grid>
+        <Grid Grid.Row="2">
+            <HorizontalStackLayout
+                HorizontalOptions="Center"
+                Spacing="8"
+                VerticalOptions="Center">
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="12"
+                    Text="{Binding AppVersion, StringFormat='Versión: {0}'}"
+                    TextColor="{StaticResource cl:Complementary1}" />
+            </HorizontalStackLayout>
+        </Grid>
+    </Grid>
+
+</ContentPage>

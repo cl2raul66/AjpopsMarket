@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="TestApp.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:TestApp"
+    xmlns:v="clr-namespace:TestApp.Views"
+    Title="TestApp"
+    Shell.FlyoutBehavior="Disabled">
+
+    <ShellContent
+        Title="LogIn"
+        ContentTemplate="{DataTemplate v:PgLogIn}"
+        Route="PgLogIn" />
+
+    <ShellContent
+        Title="Register"
+        ContentTemplate="{DataTemplate v:PgRegister}"
+        Route="PgRegister" />
+
+    <ShellContent
+        Title="Manager"
+        ContentTemplate="{DataTemplate v:PgMainManager}"
+        Route="PgMainManager" />
+
+    <ShellContent
+        Title="Market"
+        ContentTemplate="{DataTemplate v:PgMainMarket}"
+        Route="PgMainMarket" />
+
+</Shell>

@@ -1,5 +1,6 @@
-﻿using AjpopsMarketServer.Enums;
-using LiteDB;
+﻿// Ignore Spelling: SKU Jwt
+
+using AjpopsMarketServer.Enums;
 
 namespace AjpopsMarketServer.Models;
 
@@ -7,9 +8,11 @@ namespace AjpopsMarketServer.Models;
 public class User
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
-    public string Username { get; set; } = string.Empty;
+    public string UserName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
-    public string PasswordHash { get; set; } = string.Empty;
+    public string PasswordHash { get; set; } = string.Empty; 
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
     public UserType Type { get; set; } = UserType.Normal;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? LastLogin { get; set; }
@@ -93,3 +96,22 @@ public class OrderItem
     public decimal Subtotal { get; set; }
 }
 #endregion
+
+public class JwtSettings
+{
+    public string Secret { get; set; } = string.Empty;
+}
+
+public class LoginRequest
+{
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}
+
+public class AuthResult
+{
+    public bool Success { get; set; }
+    public string? Token { get; set; }
+    public User? User { get; set; }
+    public string? ErrorMessage { get; set; }
+}

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="TestApp.Views.PgRegister"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:TestApp.ViewModels"
+    Title="Register"
+    x:DataType="vm:PgRegisterViewModel"
+    Style="{StaticResource Cp}">
+
+    <Grid>
+        <VerticalStackLayout
+            MaximumWidthRequest="{OnIdiom Desktop='300'}"
+            Spacing="16"
+            VerticalOptions="Center">
+            <Label
+                FontSize="18"
+                HorizontalTextAlignment="Center"
+                Text="Registro"
+                TextColor="{StaticResource cl:Primary}" />
+            <Grid RowDefinitions="auto,auto" RowSpacing="8">
+                <Label Text="Nombre completo:" />
+                <Entry Grid.Row="1" Placeholder="Escriba aquí" />
+            </Grid>
+            <Grid RowDefinitions="auto,auto" RowSpacing="8">
+                <Label Text="Usuario:" />
+                <Entry
+                    Grid.Row="1"
+                    Keyboard="Email"
+                    Placeholder="Escriba aquí"
+                    Text="{Binding Email}" />
+            </Grid>
+            <Grid RowDefinitions="auto,auto" RowSpacing="8">
+                <Label Text="Contraseña:" />
+                <Entry
+                    Grid.Row="1"
+                    IsPassword="True"
+                    Placeholder="Escriba aquí"
+                    Text="{Binding Pwd}" />
+            </Grid>
+            <VerticalStackLayout Spacing="8">
+                <Button BackgroundColor="{StaticResource cl:Accent}" Text="Enviar" />
+                <Button Text="Cancelar" />
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </Grid>
+
+</ContentPage>

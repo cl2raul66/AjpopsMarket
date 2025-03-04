@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+    <!--  PRINCIPAL  -->
+    <Color x:Key="cl:Primary">#736B62</Color>
+    <Color x:Key="cl:Secondary">#EA3252</Color>
+    <Color x:Key="cl:Accent">#955845</Color>
+    <Color x:Key="cl:PrimaryDark">#736B62</Color>
+    <Color x:Key="cl:SecondaryDark">#EA3252</Color>
+    <Color x:Key="cl:AccentDark">#955845</Color>
+    <!--  SEMANTIC  -->
+    <Color x:Key="cl:Error">#A56A28</Color>
+    <Color x:Key="cl:Success">#77B055</Color>
+    <Color x:Key="cl:Warning">#E7D28A</Color>
+    <Color x:Key="cl:ErrorDark">#A56A28</Color>
+    <Color x:Key="cl:SuccessDark">#77B055</Color>
+    <Color x:Key="cl:WarningDark">#E7D28A</Color>
+    <!--  NEUTRAL  -->
+    <Color x:Key="cl:Foreground">#1F160F</Color>
+    <Color x:Key="cl:Background">#E8E9E2</Color>
+    <Color x:Key="cl:Complementary1">#A58A5B</Color>
+    <Color x:Key="cl:Complementary2">#8A717B</Color>
+    <Color x:Key="cl:Complementary3">#7C796A</Color>
+    <Color x:Key="cl:ForegroundDark">#1F160F</Color>
+    <Color x:Key="cl:BackgroundDark">#E8E9E2</Color>
+    <Color x:Key="cl:Complementary1Dark">#A58A5B</Color>
+    <Color x:Key="cl:Complementary2Dark">#8A717B</Color>
+    <Color x:Key="cl:Complementary3Dark">#7C796A</Color>
+</ResourceDictionary>
