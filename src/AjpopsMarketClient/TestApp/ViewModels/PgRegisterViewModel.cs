@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace TestApp.ViewModels;
 
@@ -10,4 +11,10 @@ public partial class PgRegisterViewModel : ObservableValidator
 
     [ObservableProperty]
     string? pwd;
+
+    [RelayCommand]
+    async Task GoToBack()
+    {
+        await Shell.Current.GoToAsync("..", true);
+    }
 }

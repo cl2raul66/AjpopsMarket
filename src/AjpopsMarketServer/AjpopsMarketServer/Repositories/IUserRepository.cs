@@ -4,17 +4,14 @@ namespace AjpopsMarketServer.Repositories;
 
 public interface IUserRepository
 {
-    Task<IEnumerable<User>> GetAllAsync();
-    Task<User> GetByIdAsync(string id);
-    Task<User> CreateAsync(CreateUserInput input);
-    Task<User> UpdateAsync(UpdateUserInput input);
+    void BeginTransaction();
+    void Commit();
+    Task<User> CreateAsync(User entity);
     Task<bool> DeleteAsync(string id);
-
+    void Dispose();
+    Task<IEnumerable<User>> GetAllAsync();
     Task<User?> GetByEmailAsync(string email);
-    Task<User?> GetByUserNameAsync(string userName);
-    Task<User> UpdateLastLoginAsync(string id);
-
-    Task BeginTransaction();
-    Task Commit();
-    Task Rollback();
+    Task<User> GetByIdAsync(string id);
+    void Rollback();
+    Task<bool> UpdateAsync(UpdateUserInput input);
 }

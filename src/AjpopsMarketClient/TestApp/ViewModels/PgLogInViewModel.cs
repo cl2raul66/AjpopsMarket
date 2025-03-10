@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using AjpopsMarketClient;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TestApp.Helpers;
 using TestApp.Views;
@@ -7,9 +8,12 @@ namespace TestApp.ViewModels;
 
 public partial class PgLogInViewModel : ObservableValidator
 {
-    public PgLogInViewModel()
+    readonly IAPIClientService aPIClientServ;
+
+    public PgLogInViewModel(IAPIClientService aPIClientService)
     {
         AppVersion = VersionTracking.Default.CurrentVersion;
+        aPIClientServ = aPIClientService;
     }
 
     [ObservableProperty]
@@ -23,6 +27,13 @@ public partial class PgLogInViewModel : ObservableValidator
 
     [ObservableProperty]
     string? textNotifications;
+
+    [RelayCommand]
+    async Task SendSampleMail()
+    {
+        var result = await aPIClientServ.SendEmail();
+        await Shell.Current.DisplayAlert("Notificacion", result, "Cerrar");
+    }
 
     [RelayCommand]
     async Task GoToRegister()

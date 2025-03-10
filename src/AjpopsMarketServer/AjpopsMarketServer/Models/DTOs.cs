@@ -3,41 +3,46 @@
 namespace AjpopsMarketServer.Models;
 
 #region USER
-public record CreateUserInput(
-    string UserName,
+public record LoginInput(
+    string Email,
+    string Password
+);
+
+public record RegisteUserInput(
     string Email,
     string Password,
-    string? FirstName,
-    string? LastName,
+    string? FullName,
     UserType Type = UserType.Normal
 );
 
 public record UpdateUserInput(
     string Id,
-    string? UserName,
-    string? Email, 
+    string? Email,
     string Password,
-    string? FirstName,
-    string? LastName,
+    string? FullName,
     UserType Type,
     bool? IsActive
 );
 
 public record CreateMemberInput(
-    string UserName,
     string Email,
     string Password,
     MembershipLevel Level
-); 
+);
 
 public record UpdateMemberInput(
     string Id,
-    string? UserName,
     string? Email,
     bool? IsActive,
     MembershipLevel? Level,
     DateTime? MembershipExpiresAt,
     bool? AutoRenew
+);
+
+public record AuthResponseOutput
+(
+    string Token,
+    DateTime Expiration
 );
 #endregion
 
@@ -64,7 +69,7 @@ public record UpdateProductInput(
     string? CategoryId,
     List<string>? ImageUrls,
     bool? IsAvailable
-); 
+);
 
 public record CreateCatalogInput(
     string Name,

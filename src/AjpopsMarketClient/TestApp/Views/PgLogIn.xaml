@@ -34,9 +34,11 @@
                     Text="Autenticación"
                     TextColor="{StaticResource cl:Primary}" />
                 <Grid RowDefinitions="auto,auto" RowSpacing="8">
-                    <Label Text="Usuario:" />
+                    <Label Text="Correo:" />
                     <Entry
                         Grid.Row="1"
+                        ClearButtonVisibility="WhileEditing"
+                        Keyboard="Email"
                         Placeholder="Escriba aquí"
                         Text="{Binding Email}" />
                 </Grid>
@@ -44,11 +46,13 @@
                     <Label Text="Contraseña:" />
                     <Entry
                         Grid.Row="1"
+                        ClearButtonVisibility="WhileEditing"
                         IsPassword="True"
+                        Keyboard="Plain"
                         Placeholder="Escriba aquí"
                         Text="{Binding Pwd}" />
                 </Grid>
-                <Button Text="Entrar" />
+                <Button Command="{Binding SendSampleMailCommand}" Text="Entrar" />
                 <Label
                     HorizontalTextAlignment="Center"
                     Style="{StaticResource LbLink}"

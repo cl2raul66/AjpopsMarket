@@ -2,6 +2,7 @@
 using AjpopsMarketServer.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
 namespace AjpopsMarketServer.Hubs;
 
@@ -17,156 +18,163 @@ public class UserHub : Hub
         _logger = logger;
     }
 
-    // Método para crear un nuevo usuario
-    public async Task<User> CreateUser(CreateUserInput input)
+    // Obtiene el ID del usuario autenticado
+    private string GetUserId()
     {
+        var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+        {
+            throw new HubException("Usuario no autenticado");
+        }
+        return userId;
+    }
+
+    // Verifica si el usuario actual tiene permiso para realizar operaciones
+    private async Task EnsureAuthorized(string action)
+    {
+        var userId = GetUserId();
+        var user = await _userRepository.GetByIdAsync(userId);
+
+        if (user == null)
+        {
+            throw new HubException("Usuario no encontrado");
+        }
+
+        // Aquí podrías implementar lógica adicional basada en roles si es necesario
+        // Por ejemplo:
+        // if (action == "DeleteUser" && !user.IsAdmin)
+        // {
+        //     throw new HubException("No tiene permisos para eliminar usuarios");
+        // }
+    }
+
+    // Métodos para operaciones de modificación
+
+    public async Task CreateUser(CreateUserInput input)
+    {
+        await EnsureAuthorized("CreateUser");
+
         try
         {
-            await _userRepository.BeginTransaction();
-
-            // Verificar si ya existe un usuario con el mismo email o username
-            var existingEmail = await _userRepository.GetByEmailAsync(input.Email);
-            if (existingEmail is not null)
+            // Verificar si el email ya existe
+            var existingUser = await _userRepository.GetByEmailAsync(input.Email);
+            if (existingUser is not null)
             {
-                await _userRepository.Rollback();
-                throw new HubException("Ya existe un usuario con ese email");
+                throw new HubException("El correo electrónico ya está registrado");
             }
 
-            var existingUsername = await _userRepository.GetByUserNameAsync(input.UserName);
-            if (existingUsername != null)
-            {
-                await _userRepository.Rollback();
-                throw new HubException("Ya existe un usuario con ese nombre de usuario");
-            }
-
-            // Crear el usuario
-            var newUser = await _userRepository.CreateAsync(input);
-            await _userRepository.Commit();
+            // Guardar el nuevo usuario
+            await _userRepository.CreateAsync(input);
 
             // Notificar a todos los clientes conectados
-            await Clients.All.SendAsync("UserCreated", newUser);
+            await Clients.All.SendAsync("UserCreated", input);
 
-            return newUser;
-        }
-        catch (HubException)
-        {
-            throw; // Reenviar excepciones específicas del Hub
+            _logger.LogInformation($"Usuario creado: {input.Email}");
         }
         catch (Exception ex)
         {
-            await _userRepository.Rollback();
             _logger.LogError(ex, "Error al crear usuario");
             throw new HubException($"Error al crear usuario: {ex.Message}");
         }
     }
 
-    // Método para actualizar un usuario existente
-    public async Task<User> UpdateUser(UpdateUserInput input)
+    public async Task UpdateUser(UpdateUserInput input)
     {
+        await EnsureAuthorized("UpdateUser");
+
         try
         {
-            await _userRepository.BeginTransaction();
-
             // Verificar si el usuario existe
             var existingUser = await _userRepository.GetByIdAsync(input.Id);
             if (existingUser is null)
             {
-                await _userRepository.Rollback();
-                throw new HubException($"No se encontró usuario con ID: {input.Id}");
+                throw new HubException("Usuario no encontrado");
             }
 
-            // Si se está cambiando el email, verificar que no exista otro usuario con ese email
-            if (!string.Equals(existingUser.Email, input.Email, StringComparison.OrdinalIgnoreCase))
+            // Si se cambia el email, verificar que no exista
+            if (existingUser.Email != input.Email)
             {
-                var existingEmail = await _userRepository.GetByEmailAsync(input.Email!);
-                if (existingEmail is not null)
+                var userWithSameEmail = await _userRepository.GetByEmailAsync(input.Email);
+                if (userWithSameEmail is not null && userWithSameEmail.Id != input.Id)
                 {
-                    await _userRepository.Rollback();
-                    throw new HubException("Ya existe un usuario con ese email");
+                    throw new HubException("El correo electrónico ya está en uso");
                 }
             }
 
-            // Si se está cambiando el nombre de usuario, verificar que no exista otro con ese nombre
-            if (!string.Equals(existingUser.UserName, input.UserName, StringComparison.OrdinalIgnoreCase))
-            {
-                var existingUsername = await _userRepository.GetByUserNameAsync(input.UserName!);
-                if (existingUsername is not null)
-                {
-                    await _userRepository.Rollback();
-                    throw new HubException("Ya existe un usuario con ese nombre de usuario");
-                }
-            }
-
-            // Actualizar el usuario
-            var updatedUser = await _userRepository.UpdateAsync(input);
-            await _userRepository.Commit();
+            // Actualizar usuario
+            await _userRepository.UpdateAsync(input);
 
             // Notificar a todos los clientes conectados
-            await Clients.All.SendAsync("UserUpdated", updatedUser);
+            await Clients.All.SendAsync("UserUpdated", input);
 
-            return updatedUser;
-        }
-        catch (HubException)
-        {
-            throw; // Reenviar excepciones específicas del Hub
+            _logger.LogInformation($"Usuario actualizado: {input.Id}");
         }
         catch (Exception ex)
         {
-            await _userRepository.Rollback();
             _logger.LogError(ex, "Error al actualizar usuario");
             throw new HubException($"Error al actualizar usuario: {ex.Message}");
         }
     }
 
-    // Método para eliminar un usuario
-    public async Task<bool> DeleteUser(string id)
+    public async Task DeleteUser(string userId)
     {
+        await EnsureAuthorized("DeleteUser");
+
         try
         {
-            await _userRepository.BeginTransaction();
-
             // Verificar si el usuario existe
-            var existingUser = await _userRepository.GetByIdAsync(id);
+            var existingUser = await _userRepository.GetByIdAsync(userId);
             if (existingUser is null)
             {
-                await _userRepository.Rollback();
-                throw new HubException($"No se encontró usuario con ID: {id}");
+                throw new HubException("Usuario no encontrado");
             }
 
-            // Eliminar el usuario
-            var result = await _userRepository.DeleteAsync(id);
-            await _userRepository.Commit();
+            // Eliminar usuario
+            await _userRepository.DeleteAsync(userId);
 
-            if (result)
-            {
-                // Notificar a todos los clientes conectados
-                await Clients.All.SendAsync("UserDeleted", id);
-            }
+            // Notificar a todos los clientes conectados
+            await Clients.All.SendAsync("UserDeleted", userId);
 
-            return result;
-        }
-        catch (HubException)
-        {
-            throw; // Reenviar excepciones específicas del Hub
+            _logger.LogInformation($"Usuario eliminado: {userId}");
         }
         catch (Exception ex)
         {
-            await _userRepository.Rollback();
             _logger.LogError(ex, "Error al eliminar usuario");
             throw new HubException($"Error al eliminar usuario: {ex.Message}");
         }
     }
 
-    // Método para registrar la conexión y desconexión de clientes (opcional)
+    // Otros métodos de modificación según sea necesario...
+
+    // Método llamado cuando un cliente se conecta
     public override async Task OnConnectedAsync()
     {
-        _logger.LogInformation($"Cliente conectado: {Context.ConnectionId}");
-        await base.OnConnectedAsync();
+        try
+        {
+            var userId = GetUserId();
+            _logger.LogInformation($"Usuario conectado: {userId}");
+            await base.OnConnectedAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error en la conexión del cliente");
+            throw;
+        }
     }
 
-    public override async Task OnDisconnectedAsync(Exception? exception)
+    // Método llamado cuando un cliente se desconecta
+    public override async Task OnDisconnectedAsync(Exception exception)
     {
-        _logger.LogInformation($"Cliente desconectado: {Context.ConnectionId}. Motivo: {exception?.Message ?? "Desconexión normal"}");
-        await base.OnDisconnectedAsync(exception);
+        try
+        {
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            _logger.LogInformation($"Usuario desconectado: {userId}");
+            await base.OnDisconnectedAsync(exception);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error en la desconexión del cliente");
+            throw;
+        }
     }
 }

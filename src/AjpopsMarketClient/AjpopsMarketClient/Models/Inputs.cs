@@ -4,27 +4,22 @@ namespace AjpopsMarketClient.Models;
 
 #region USER
 public record CreateUserInput(
-    string UserName,
     string Email,
     string Password,
-    string? FirstName,
-    string? LastName,
+    string? FullName,
     UserType Type = UserType.Normal
 );
 
 public record UpdateUserInput(
     string Id,
-    string? UserName,
     string? Email,
     string Password,
-    string? FirstName,
-    string? LastName,
+    string? FullName,
     UserType Type,
     bool? IsActive
 );
 
 public record CreateMemberInput(
-    string UserName,
     string Email,
     string Password,
     MembershipLevel Level
@@ -32,7 +27,6 @@ public record CreateMemberInput(
 
 public record UpdateMemberInput(
     string Id,
-    string? UserName,
     string? Email,
     bool? IsActive,
     MembershipLevel? Level,

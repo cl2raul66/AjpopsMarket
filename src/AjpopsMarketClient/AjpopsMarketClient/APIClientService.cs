@@ -18,9 +18,13 @@ public interface IAPIClientService
     void Dispose();
     Task<IEnumerable<dynamic>> GetAllUsersAsync();
     Task<dynamic> GetUserByIdAsync(string id);
+    Task<dynamic> GetUserByEmailAsync(string email);
     Task<(bool Success, dynamic User, string Error)> LoginAsync(string email, string password);
+    Task<(bool Success, dynamic User, string Error)> RegisterAsync(CreateUserInput input);
+    Task<(bool Success, dynamic User, string Error)> RegisterMemberAsync(CreateMemberInput input);
     Task<dynamic> UpdateMemberAsync(UpdateMemberInput input);
     Task<dynamic> UpdateUserAsync(UpdateUserInput input);
+    Task<string> SendEmail();
 }
 
 public class APIClientService : IDisposable, IAPIClientService
@@ -69,13 +73,13 @@ public class APIClientService : IDisposable, IAPIClientService
     {
         try
         {
-            var loginData = new
+            var loginData = new UpdateUserInput
             {
-                email,
-                password
+                Email = email,
+                Password = password
             };
 
-            var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/api/auth/login", loginData);
+            var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/auth/login", loginData);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -100,6 +104,68 @@ public class APIClientService : IDisposable, IAPIClientService
             }
 
             return (true, result.GetProperty("user"), null);
+        }
+        catch (Exception ex)
+        {
+            return (false, null, $"Error de conexión: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Registrar un nuevo usuario usando el endpoint REST
+    /// </summary>
+    /// <param name="input">Datos del usuario a registrar</param>
+    /// <returns>Resultado del registro</returns>
+    public async Task<(bool Success, dynamic User, string Error)> RegisterAsync(CreateUserInput input)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/auth/register", input);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return (false, null, $"Error: {response.StatusCode} - {errorContent}");
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<dynamic>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            return (true, result, null);
+        }
+        catch (Exception ex)
+        {
+            return (false, null, $"Error de conexión: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Registrar un nuevo miembro usando el endpoint REST
+    /// </summary>
+    /// <param name="input">Datos del miembro a registrar</param>
+    /// <returns>Resultado del registro</returns>
+    public async Task<(bool Success, dynamic User, string Error)> RegisterMemberAsync(CreateMemberInput input)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/auth/register-member", input);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return (false, null, $"Error: {response.StatusCode} - {errorContent}");
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<dynamic>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            return (true, result, null);
         }
         catch (Exception ex)
         {
@@ -176,7 +242,7 @@ public class APIClientService : IDisposable, IAPIClientService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"{_baseUrl}/api/users");
+            var response = await _httpClient.GetAsync($"{_baseUrl}/users");
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
@@ -201,7 +267,7 @@ public class APIClientService : IDisposable, IAPIClientService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"{_baseUrl}/api/users/{id}");
+            var response = await _httpClient.GetAsync($"{_baseUrl}/users/{id}");
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
@@ -213,6 +279,31 @@ public class APIClientService : IDisposable, IAPIClientService
         catch (Exception ex)
         {
             Console.WriteLine($"Error al obtener el usuario con ID {id}: {ex.Message}");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Obtener un usuario por Email usando REST
+    /// </summary>
+    /// <param name="email">Email del usuario</param>
+    /// <returns>Usuario</returns>
+    public async Task<dynamic> GetUserByEmailAsync(string email)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"{_baseUrl}/users/by-email/{email}");
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<dynamic>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al obtener el usuario con email {email}: {ex.Message}");
             throw;
         }
     }
@@ -322,6 +413,26 @@ public class APIClientService : IDisposable, IAPIClientService
         }
     }
 
+    /// <summary>
+    /// Enviar un email de prueba usando el endpoint REST
+    /// </summary>
+    /// <returns>Respuesta del servidor</returns>
+    public async Task<string> SendEmail()
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"{_baseUrl}/send-email");
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            return content;
+        }
+        catch (Exception ex)
+        {
+            return ex.Message;
+        }
+    }
+
     #endregion
 
     /// <summary>
@@ -329,7 +440,7 @@ public class APIClientService : IDisposable, IAPIClientService
     /// </summary>
     private void EnsureConnected()
     {
-        if (!_isConnected || _connection.State != HubConnectionState.Connected)
+        if (!_isConnected || _connection.State is not HubConnectionState.Connected)
         {
             throw new InvalidOperationException("No hay conexión establecida con el servidor. Inicie sesión primero.");
         }
@@ -340,7 +451,7 @@ public class APIClientService : IDisposable, IAPIClientService
     /// </summary>
     public void Dispose()
     {
-        if (_connection != null)
+        if (_connection is not null)
         {
             _connection.DisposeAsync().GetAwaiter().GetResult();
         }
